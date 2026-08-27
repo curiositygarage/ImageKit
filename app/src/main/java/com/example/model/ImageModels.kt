@@ -4,20 +4,20 @@ import android.net.Uri
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 
-enum class NavigationTab(val label: String, val icon: String) {
-    HOME("Home", "🏠"),
-    STUDIO("Studio", "🖼️"),
-    BATCH("Batch", "🛠️"),
-    LIBRARY("Library", "📁")
+enum class NavigationTab(val label: String) {
+    HOME("Home"),
+    STUDIO("Studio"),
+    BATCH("Batch"),
+    LIBRARY("Library")
 }
 
-enum class EditTool(val label: String, val description: String, val icon: String) {
-    RESIZE_CONVERT("HTML & Web Optimizer", "Passport, web form & target size compressor", "🌐"),
-    CROP_ROTATE("Crop & Orient", "Passport 2x2, Document A4, Rotate & Flip", "📐"),
-    FILTERS("Doc & Lens Filter", "Receipt cleaner, whiteboard, magic color", "🧾"),
-    AUTO_ENHANCE("Auto-Clarity", "One-tap desk exposure & shadow balance", "✨"),
-    ADJUST("Adjustments", "Brightness, contrast, saturation & warmth", "🎛️"),
-    REDACT_MARKUP("Privacy & Markup", "Blackout, pixelate & annotate", "🛡️")
+enum class EditTool(val label: String, val description: String) {
+    RESIZE_CONVERT("HTML & Web Optimizer", "Passport, web form & target size compressor"),
+    CROP_ROTATE("Crop & Orient", "Passport 2x2, Document A4, Rotate & Flip"),
+    FILTERS("Doc & Lens Filter", "Receipt cleaner, whiteboard, magic color"),
+    AUTO_ENHANCE("Auto-Clarity", "One-tap desk exposure & shadow balance"),
+    ADJUST("Adjustments", "Brightness, contrast, saturation & warmth"),
+    REDACT_MARKUP("Privacy & Markup", "Blackout, pixelate & annotate")
 }
 
 enum class AspectRatioPreset(val label: String, val ratio: Float?) {
@@ -34,7 +34,6 @@ enum class AspectRatioPreset(val label: String, val ratio: Float?) {
 enum class WebUploadPreset(
     val title: String,
     val subtitle: String,
-    val icon: String,
     val targetWidth: Int?,
     val targetHeight: Int?,
     val maxBytes: Long?,
@@ -44,7 +43,6 @@ enum class WebUploadPreset(
     PASSPORT_ID(
         title = "Passport / Visa Photo",
         subtitle = "600×600 px • Under 240 KB (Gov/Visa Portal Spec)",
-        icon = "🛂",
         targetWidth = 600,
         targetHeight = 600,
         maxBytes = 240 * 1024L,
@@ -54,7 +52,6 @@ enum class WebUploadPreset(
     WEB_FORM_UPLOAD(
         title = "HTML / Web Form Upload",
         subtitle = "Max 1200px • Under 500 KB (Avoids 413 Payload Errors)",
-        icon = "🌐",
         targetWidth = 1200,
         targetHeight = 1200,
         maxBytes = 500 * 1024L,
@@ -64,7 +61,6 @@ enum class WebUploadPreset(
     SEARCH_SEO_THUMB(
         title = "Search & Thumbnail",
         subtitle = "Max 600px • Ultra-compact WebP (< 80 KB)",
-        icon = "🔍",
         targetWidth = 600,
         targetHeight = 600,
         maxBytes = 80 * 1024L,
@@ -74,7 +70,6 @@ enum class WebUploadPreset(
     DESKTOP_WEBAPP(
         title = "Desktop / WebApp (1080p)",
         subtitle = "1920×1080 FHD • Fast load (< 1 MB)",
-        icon = "💻",
         targetWidth = 1920,
         targetHeight = 1080,
         maxBytes = 1024 * 1024L,
@@ -84,7 +79,6 @@ enum class WebUploadPreset(
     AVATAR_PROFILE(
         title = "Profile / Avatar",
         subtitle = "400×400 px Square • Under 100 KB",
-        icon = "👤",
         targetWidth = 400,
         targetHeight = 400,
         maxBytes = 100 * 1024L,
@@ -94,7 +88,6 @@ enum class WebUploadPreset(
     EMAIL_LIGHT(
         title = "Email Attachment",
         subtitle = "Quick lightweight downscale (< 200 KB)",
-        icon = "✉️",
         targetWidth = 800,
         targetHeight = 800,
         maxBytes = 200 * 1024L,
@@ -116,13 +109,13 @@ enum class FilterPreset(val label: String, val description: String) {
     INVERT("Invert Schematic", "Dark mode blueprint inverter")
 }
 
-enum class MarkupType(val label: String, val icon: String) {
-    BLACKOUT("Blackout Box", "⬛"),
-    PIXELATE("Pixelate Box", "▫️"),
-    BLUR_BOX("Blur Box", "🌫️"),
-    HIGHLIGHT("Highlight", "🖍️"),
-    ARROW("Arrow Callout", "➡️"),
-    TEXT("Text Note", "🏷️")
+enum class MarkupType(val label: String) {
+    BLACKOUT("Blackout Box"),
+    PIXELATE("Pixelate Box"),
+    BLUR_BOX("Blur Box"),
+    HIGHLIGHT("Highlight"),
+    ARROW("Arrow Callout"),
+    TEXT("Text Note")
 }
 
 data class MarkupItem(
@@ -187,4 +180,3 @@ data class SavedImageItem(
     val format: ExportFormat = ExportFormat.JPEG,
     val timestamp: Long = System.currentTimeMillis()
 )
-

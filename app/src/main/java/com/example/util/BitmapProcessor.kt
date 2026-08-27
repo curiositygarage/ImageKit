@@ -30,6 +30,7 @@ import com.curiositygarage.imagekit.model.ResizeScale
 import com.curiositygarage.imagekit.model.SavedImageItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -42,20 +43,47 @@ import kotlin.math.sin
 
 object BitmapProcessor {
 
+    private const val TAG_PROCESSOR = "BitmapProcessor"
+    private const val TAG_COMPRESSOR = "ImageCompressor"
+    private const val TAG_STORAGE = "StorageManager"
+
     suspend fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
+        val startTime = System.currentTimeMillis()
         try {
             val input: InputStream? = context.contentResolver.openInputStream(uri)
+            if (input == null) {
+                Timber.tag(TAG_PROCESSOR).w("Failed to open InputStream for source URI")
+                return@withContext null
+            }
+
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
             }
             BitmapFactory.decodeStream(input, null, options)
-            input?.close()
+            input.close()
 
-            // Downsample if mega large (> 3000px) to prevent OOM
+            val rawWidth = options.outWidth
+            val rawHeight = options.outHeight
+
+            if (rawWidth <= 0 || rawHeight <= 0) {
+                Timber.tag(TAG_PROCESSOR).w("Invalid image bounds decoded: %dx%d", rawWidth, rawHeight)
+                return@withContext null
+            }
+
+            // Downsample if mega large (> 3200px) to prevent OOM
             var inSampleSize = 1
-            val maxDim = max(options.outWidth, options.outHeight)
+            val maxDim = max(rawWidth, rawHeight)
             while (maxDim / inSampleSize > 3200) {
                 inSampleSize *= 2
+            }
+
+            if (inSampleSize > 1) {
+                Timber.tag(TAG_PROCESSOR).i(
+                    "Downsample applied: original=%dx%d, inSampleSize=%d",
+                    rawWidth,
+                    rawHeight,
+                    inSampleSize
+                )
             }
 
             val loadOptions = BitmapFactory.Options().apply {
@@ -65,20 +93,34 @@ object BitmapProcessor {
             val newInput: InputStream? = context.contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(newInput, null, loadOptions)
             newInput?.close()
+
+            val duration = System.currentTimeMillis() - startTime
+            if (bitmap != null) {
+                Timber.tag(TAG_PROCESSOR).i(
+                    "Image decoded successfully: %dx%d px (took %dms)",
+                    bitmap.width,
+                    bitmap.height,
+                    duration
+                )
+            } else {
+                Timber.tag(TAG_PROCESSOR).w("BitmapFactory.decodeStream returned null bitmap")
+            }
             bitmap
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.tag(TAG_PROCESSOR).e(e, "Exception during image decode")
             null
         }
     }
 
     fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
         if (degrees == 0f) return source
+        Timber.tag(TAG_PROCESSOR).d("Rotating bitmap %dx%d by %.1f degrees", source.width, source.height, degrees)
         val matrix = Matrix().apply { postRotate(degrees) }
         return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
 
     fun flipBitmap(source: Bitmap, horizontal: Boolean, vertical: Boolean): Bitmap {
+        Timber.tag(TAG_PROCESSOR).d("Flipping bitmap %dx%d (h=%b, v=%b)", source.width, source.height, horizontal, vertical)
         val matrix = Matrix().apply {
             postScale(
                 if (horizontal) -1f else 1f,
@@ -99,6 +141,9 @@ object BitmapProcessor {
         val cropWidth = max(1, right - left)
         val cropHeight = max(1, bottom - top)
 
+        Timber.tag(TAG_PROCESSOR).d("Cropping bitmap from %dx%d to rect=[%d,%d,%d,%d] -> %dx%d",
+            source.width, source.height, left, top, right, bottom, cropWidth, cropHeight)
+
         return Bitmap.createBitmap(source, left, top, cropWidth, cropHeight)
     }
 
@@ -107,8 +152,10 @@ object BitmapProcessor {
         preset: FilterPreset,
         adjustments: Adjustments
     ): Bitmap {
+        val startTime = System.currentTimeMillis()
+
         // First handle special pixel-based algorithms if needed
-        var base = when (preset) {
+        val base = when (preset) {
             FilterPreset.DOC_CLEAN -> applyDocumentCleanFilter(source)
             FilterPreset.WHITEBOARD -> applyWhiteboardFilter(source)
             FilterPreset.MAGIC_COLOR -> applyMagicColorFilter(source)
@@ -221,6 +268,14 @@ object BitmapProcessor {
         if (adjustments.vignette > 0f) {
             applyVignetteToCanvas(canvas, base.width, base.height, adjustments.vignette)
         }
+
+        val duration = System.currentTimeMillis() - startTime
+        Timber.tag(TAG_PROCESSOR).d(
+            "Filter & adjustments applied: preset=%s, isDefaultAdj=%b (took %dms)",
+            preset.name,
+            adjustments.isDefault,
+            duration
+        )
 
         return output
     }
@@ -398,6 +453,7 @@ object BitmapProcessor {
                     val top = (item.rect.top * h).toInt().coerceIn(0, source.height - 1)
                     val right = (item.rect.right * w).toInt().coerceIn(left + 1, source.width)
                     val bottom = (item.rect.bottom * h).toInt().coerceIn(top + 1, source.height)
+
                     val boxW = right - left
                     val boxH = bottom - top
 
@@ -546,6 +602,7 @@ object BitmapProcessor {
 
         val w = max(1, targetW)
         val h = max(1, targetH)
+        Timber.tag(TAG_PROCESSOR).d("Resizing bitmap by preset %s: %dx%d -> %dx%d", scale.name, origW, origH, w, h)
         return Bitmap.createScaledBitmap(source, w, h, true)
     }
 
@@ -578,6 +635,11 @@ object BitmapProcessor {
             finalH = max(1, if (targetHeight > 0) targetHeight else origH)
         }
 
+        Timber.tag(TAG_PROCESSOR).d(
+            "Resizing to dimensions: target=[%dx%d], aspectLocked=%b -> final=[%dx%d]",
+            targetWidth, targetHeight, maintainAspect, finalW, finalH
+        )
+
         return Bitmap.createScaledBitmap(source, finalW, finalH, true)
     }
 
@@ -587,11 +649,17 @@ object BitmapProcessor {
         targetBytes: Long,
         preferredFormat: ExportFormat = ExportFormat.WEBP
     ): Triple<Bitmap, ExportFormat, Int> {
+        val startTime = System.currentTimeMillis()
         var currentBitmap = source
-        var format = preferredFormat
+        val format = preferredFormat
         var quality = 85
 
         var estimated = estimateFileSize(currentBitmap, format, quality)
+        Timber.tag(TAG_COMPRESSOR).d(
+            "Auto-compress started: input=%dx%d, initialEstBytes=%d, targetBudget=%d, format=%s",
+            source.width, source.height, estimated, targetBytes, format.name
+        )
+
         if (estimated <= targetBytes) {
             return Triple(currentBitmap, format, quality)
         }
@@ -603,6 +671,11 @@ object BitmapProcessor {
         }
 
         if (estimated <= targetBytes) {
+            val duration = System.currentTimeMillis() - startTime
+            Timber.tag(TAG_COMPRESSOR).i(
+                "Auto-compress achieved by quality tuning: q=%d, size=%d bytes (took %dms)",
+                quality, estimated, duration
+            )
             return Triple(currentBitmap, format, quality)
         }
 
@@ -621,6 +694,12 @@ object BitmapProcessor {
             }
             scaleFactor -= 0.15f
         }
+
+        val duration = System.currentTimeMillis() - startTime
+        Timber.tag(TAG_COMPRESSOR).i(
+            "Auto-compress achieved with downscale: finalDims=%dx%d, q=%d, size=%d bytes (took %dms)",
+            currentBitmap.width, currentBitmap.height, quality, estimated, duration
+        )
 
         return Triple(currentBitmap, format, quality)
     }
@@ -650,6 +729,7 @@ object BitmapProcessor {
         originalSizeBytes: Long = 0L,
         baseName: String = "ImageKit_Edit"
     ): SavedImageItem = withContext(Dispatchers.IO) {
+        val startTime = System.currentTimeMillis()
         val timestamp = System.currentTimeMillis()
         val filename = "${baseName}_${timestamp}.${format.extension}"
         val compressFormat = when (format) {
@@ -675,6 +755,12 @@ object BitmapProcessor {
             }
             localPath = cacheFile.absolutePath
             sizeBytes = cacheFile.length()
+
+            Timber.tag(TAG_STORAGE).d(
+                "Exported to app cache: path=%s, size=%d bytes",
+                cacheFile.name,
+                sizeBytes
+            )
 
             // Also publish to MediaStore Pictures/ImageKit if on device
             val contentValues = ContentValues().apply {
@@ -703,9 +789,17 @@ object BitmapProcessor {
                     context.contentResolver.update(uri, contentValues, null, null)
                 }
                 savedUri = uri
+                Timber.tag(TAG_STORAGE).i(
+                    "MediaStore export successful: filename=%s, size=%d bytes, duration=%dms",
+                    filename,
+                    sizeBytes,
+                    System.currentTimeMillis() - startTime
+                )
+            } else {
+                Timber.tag(TAG_STORAGE).w("MediaStore.insert returned null URI for %s", filename)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Timber.tag(TAG_STORAGE).e(e, "Failed to save image to device storage")
         }
 
         SavedImageItem(

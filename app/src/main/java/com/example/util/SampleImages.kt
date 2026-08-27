@@ -449,7 +449,7 @@ object SampleImages {
             isFakeBoldText = true
             isAntiAlias = true
         }
-        canvas.drawText("📸 RAW WORKBENCH PHOTO (2400×1600 px • 8.4 MB RAW)", 140f, 155f, exifTitle)
+        canvas.drawText("RAW WORKBENCH PHOTO (2400×1600 px • 8.4 MB RAW)", 140f, 155f, exifTitle)
 
         val exifSub = Paint().apply {
             color = Color.rgb(160, 180, 200)

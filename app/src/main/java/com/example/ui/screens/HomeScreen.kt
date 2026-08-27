@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,18 +18,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,23 +47,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curiositygarage.imagekit.R
 import com.curiositygarage.imagekit.model.EditTool
 import com.curiositygarage.imagekit.model.NavigationTab
 import com.curiositygarage.imagekit.ui.components.AppHeader
+import com.curiositygarage.imagekit.ui.components.IosGroupedCard
+import com.curiositygarage.imagekit.ui.components.IosListRow
 import com.curiositygarage.imagekit.ui.components.QuickToolCard
-import com.curiositygarage.imagekit.ui.theme.ElegantBackground
-import com.curiositygarage.imagekit.ui.theme.ElegantOnPrimary
-import com.curiositygarage.imagekit.ui.theme.ElegantOutline
-import com.curiositygarage.imagekit.ui.theme.ElegantPrimary
-import com.curiositygarage.imagekit.ui.theme.ElegantSurface
-import com.curiositygarage.imagekit.ui.theme.ElegantSurfaceContainerHigh
-import com.curiositygarage.imagekit.ui.theme.ElegantSurfaceVariant
-import com.curiositygarage.imagekit.ui.theme.ElegantTextPrimary
-import com.curiositygarage.imagekit.ui.theme.ElegantTextSecondary
+import com.curiositygarage.imagekit.ui.theme.IosCardSurface
+import com.curiositygarage.imagekit.ui.theme.IosLabelPrimary
+import com.curiositygarage.imagekit.ui.theme.IosLabelSecondary
+import com.curiositygarage.imagekit.ui.theme.IosLabelTertiary
+import com.curiositygarage.imagekit.ui.theme.IosSecondarySystemBackgroundDark
+import com.curiositygarage.imagekit.ui.theme.IosSeparatorOpaque
+import com.curiositygarage.imagekit.ui.theme.IosSystemBackgroundDark
+import com.curiositygarage.imagekit.ui.theme.IosSystemBlue
+import com.curiositygarage.imagekit.ui.theme.IosSystemGreen
+import com.curiositygarage.imagekit.ui.theme.IosSystemIndigo
+import com.curiositygarage.imagekit.ui.theme.IosSystemOrange
+import com.curiositygarage.imagekit.ui.theme.IosSystemPurple
+import com.curiositygarage.imagekit.ui.theme.IosSystemRed
+import com.curiositygarage.imagekit.ui.theme.IosSystemTeal
+import com.curiositygarage.imagekit.ui.theme.IosTertiarySystemBackgroundDark
 import com.curiositygarage.imagekit.viewmodel.EditorUiState
 import com.curiositygarage.imagekit.viewmodel.ImageEditorViewModel
 
@@ -67,6 +85,7 @@ fun HomeScreen(
     uiState: EditorUiState,
     modifier: Modifier = Modifier
 ) {
+    val haptics = LocalHapticFeedback.current
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
@@ -78,15 +97,15 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ElegantBackground)
+            .background(IosSystemBackgroundDark)
             .verticalScroll(rememberScrollState())
             .padding(bottom = 24.dp)
     ) {
-        // App Header
+        // iOS Large Navigation Header
         AppHeader(
-            title = "ImageKit",
-            subtitle = "Pocket Editor",
-            actionIcon = "🖼️",
+            title = stringResource(R.string.app_name),
+            subtitle = stringResource(R.string.app_subtitle),
+            actionIcon = Icons.Outlined.AutoFixHigh,
             onActionClick = { viewModel.setTab(NavigationTab.STUDIO) }
         )
 
@@ -96,21 +115,22 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Hero Import Box (Matches Design HTML)
+            // Hero Photo Import Card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9.5f)
-                    .clip(RoundedCornerShape(28.dp))
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(16.dp))
                     .clickable {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         photoPickerLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     }
                     .testTag("open_gallery_hero_card"),
-                shape = RoundedCornerShape(28.dp),
-                color = ElegantSurface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, ElegantOutline)
+                shape = RoundedCornerShape(16.dp),
+                color = IosCardSurface,
+                border = androidx.compose.foundation.BorderStroke(0.5.dp, IosSeparatorOpaque)
             ) {
                 Box(
                     modifier = Modifier
@@ -118,7 +138,7 @@ fun HomeScreen(
                         .background(
                             Brush.radialGradient(
                                 colors = listOf(
-                                    ElegantSurfaceContainerHigh.copy(alpha = 0.5f),
+                                    IosSystemBlue.copy(alpha = 0.12f),
                                     Color.Transparent
                                 )
                             )
@@ -132,17 +152,17 @@ fun HomeScreen(
                     ) {
                         Surface(
                             modifier = Modifier
-                                .size(56.dp)
-                                .clip(RoundedCornerShape(18.dp)),
-                            shape = RoundedCornerShape(18.dp),
-                            color = ElegantPrimary
+                                .size(52.dp)
+                                .clip(CircleShape),
+                            shape = CircleShape,
+                            color = IosSystemBlue
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Default.Add,
+                                    imageVector = Icons.Default.AddPhotoAlternate,
                                     contentDescription = "Open Gallery",
-                                    tint = ElegantOnPrimary,
-                                    modifier = Modifier.size(28.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(26.dp)
                                 )
                             }
                         }
@@ -150,146 +170,107 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Open from Gallery",
+                            text = stringResource(R.string.home_hero_title),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 16.sp
+                                fontSize = 17.sp,
+                                letterSpacing = (-0.3).sp
                             ),
-                            color = ElegantTextPrimary
+                            color = IosLabelPrimary
                         )
 
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = "Supports PNG, JPG, WEBP",
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = ElegantTextSecondary
+                            text = stringResource(R.string.home_hero_subtitle),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 13.sp,
+                                letterSpacing = (-0.1).sp
+                            ),
+                            color = IosLabelSecondary
                         )
                     }
                 }
             }
 
-            // Quick Desk & Web Demo Sample Presets
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "WORKBENCH DEMO SAMPLES",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.2.sp,
-                            fontSize = 11.sp
-                        ),
-                        color = ElegantTextSecondary
-                    )
-                    Text(
-                        text = "Instant 1-tap test",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                        color = ElegantPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SampleChip(
-                        icon = "🛂",
-                        label = "Passport Photo",
-                        onClick = {
-                            viewModel.loadSampleImage("passport")
-                            viewModel.setActiveTool(EditTool.RESIZE_CONVERT)
-                            viewModel.setTab(NavigationTab.STUDIO)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    SampleChip(
-                        icon = "📸",
-                        label = "8.4MB Raw Photo",
-                        onClick = {
-                            viewModel.loadSampleImage("raw_photo")
-                            viewModel.setActiveTool(EditTool.RESIZE_CONVERT)
-                            viewModel.setTab(NavigationTab.STUDIO)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SampleChip(
-                        icon = "🧾",
-                        label = "Receipt Clean",
-                        onClick = {
-                            viewModel.loadSampleImage("receipt")
-                            viewModel.setActiveTool(EditTool.FILTERS)
-                            viewModel.setTab(NavigationTab.STUDIO)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    SampleChip(
-                        icon = "📦",
-                        label = "Shipping Label",
-                        onClick = {
-                            viewModel.loadSampleImage("shipping")
-                            viewModel.setActiveTool(EditTool.REDACT_MARKUP)
-                            viewModel.setTab(NavigationTab.STUDIO)
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+            // Workbench Demo Samples
+            IosGroupedCard(
+                header = stringResource(R.string.home_section_samples),
+                footer = stringResource(R.string.home_samples_subtitle)
+            ) {
+                IosListRow(
+                    title = "Passport & Visa Portrait",
+                    subtitle = "600×600 px • Target < 240 KB spec",
+                    icon = Icons.Default.Badge,
+                    iconBgColor = IosSystemBlue,
+                    showChevron = true,
+                    onClick = {
+                        viewModel.loadSampleImage("passport")
+                        viewModel.setActiveTool(EditTool.RESIZE_CONVERT)
+                        viewModel.setTab(NavigationTab.STUDIO)
+                    }
+                )
+                IosListRow(
+                    title = "Hardware Receipt & Invoice",
+                    subtitle = "Dynamic shadow clean & dark ink thresholding",
+                    icon = Icons.Default.Receipt,
+                    iconBgColor = IosSystemOrange,
+                    showChevron = true,
+                    onClick = {
+                        viewModel.loadSampleImage("receipt")
+                        viewModel.setActiveTool(EditTool.FILTERS)
+                        viewModel.setTab(NavigationTab.STUDIO)
+                    }
+                )
+                IosListRow(
+                    title = "8.4MB Raw Camera Photo",
+                    subtitle = "Test large memory downscaling & JPEG optimizer",
+                    icon = Icons.Default.PhotoCamera,
+                    iconBgColor = IosSystemGreen,
+                    showChevron = true,
+                    onClick = {
+                        viewModel.loadSampleImage("raw_photo")
+                        viewModel.setActiveTool(EditTool.RESIZE_CONVERT)
+                        viewModel.setTab(NavigationTab.STUDIO)
+                    }
+                )
+                IosListRow(
+                    title = "Shipping Label & Address",
+                    subtitle = "Test blackout privacy and redactions",
+                    icon = Icons.Default.Security,
+                    iconBgColor = IosSystemIndigo,
+                    showChevron = true,
+                    showDivider = false,
+                    onClick = {
+                        viewModel.loadSampleImage("shipping")
+                        viewModel.setActiveTool(EditTool.REDACT_MARKUP)
+                        viewModel.setTab(NavigationTab.STUDIO)
+                    }
+                )
             }
 
-            // Quick Tools Header & 2x2 Grid (Matches Design HTML)
+            // Quick Studio Tools (2x2 Grid)
             Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 2.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "QUICK TOOLS",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.5.sp,
-                            fontSize = 11.sp
-                        ),
-                        color = ElegantTextSecondary
-                    )
-                    Text(
-                        text = "Open Studio",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 11.sp
-                        ),
-                        color = ElegantPrimary,
-                        modifier = Modifier
-                            .clickable { viewModel.setTab(NavigationTab.STUDIO) }
-                            .padding(4.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.home_section_quick_tools).uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.6.sp,
+                        fontSize = 12.sp
+                    ),
+                    color = IosLabelTertiary,
+                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     QuickToolCard(
-                        icon = "🌐",
-                        title = "HTML & Web Fit",
-                        subtitle = "Passport & <500KB shrink",
+                        icon = Icons.Default.Compress,
+                        iconBgColor = IosSystemBlue,
+                        title = stringResource(R.string.tool_web_optimizer),
+                        subtitle = "< 500 KB Form Fit",
                         onClick = {
                             viewModel.setActiveTool(EditTool.RESIZE_CONVERT)
                             viewModel.setTab(NavigationTab.STUDIO)
@@ -297,9 +278,10 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
                     QuickToolCard(
-                        icon = "📐",
-                        title = "Crop & Orient",
-                        subtitle = "Passport 2x2 & A4 doc",
+                        icon = Icons.Default.Crop,
+                        iconBgColor = IosSystemPurple,
+                        title = stringResource(R.string.tool_crop_rotate),
+                        subtitle = "Passport 2×2 & A4",
                         onClick = {
                             viewModel.setActiveTool(EditTool.CROP_ROTATE)
                             viewModel.setTab(NavigationTab.STUDIO)
@@ -308,16 +290,17 @@ fun HomeScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     QuickToolCard(
-                        icon = "🧾",
-                        title = "Doc & Receipt",
-                        subtitle = "Clean paper & ink boost",
+                        icon = Icons.Default.AutoAwesome,
+                        iconBgColor = IosSystemOrange,
+                        title = stringResource(R.string.tool_filters),
+                        subtitle = "Clean Paper & Ink",
                         onClick = {
                             viewModel.setActiveTool(EditTool.FILTERS)
                             viewModel.setTab(NavigationTab.STUDIO)
@@ -325,9 +308,10 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
                     QuickToolCard(
-                        icon = "🛡️",
-                        title = "Redact & Privacy",
-                        subtitle = "Blackout & pixelate box",
+                        icon = Icons.Default.Brush,
+                        iconBgColor = IosSystemRed,
+                        title = stringResource(R.string.tool_redact_markup),
+                        subtitle = "Blackout & Annotate",
                         onClick = {
                             viewModel.setActiveTool(EditTool.REDACT_MARKUP)
                             viewModel.setTab(NavigationTab.STUDIO)
@@ -337,82 +321,30 @@ fun HomeScreen(
                 }
             }
 
-            // Quick feature highlight card for home office
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                color = ElegantSurface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, ElegantOutline)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF003733)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "🛡️", fontSize = 20.sp)
-                    }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Privacy Redaction & Offline",
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp
-                            ),
-                            color = ElegantTextPrimary
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Blackout serial numbers and addresses locally. 100% on-device processing.",
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                            color = ElegantTextSecondary
-                        )
-                    }
-                }
+            // Pro Capabilities Inset Card
+            IosGroupedCard(header = stringResource(R.string.home_features_title)) {
+                IosListRow(
+                    title = stringResource(R.string.home_feature_offline_title),
+                    subtitle = stringResource(R.string.home_feature_offline_desc),
+                    icon = Icons.Default.Lock,
+                    iconBgColor = IosSystemGreen,
+                    showDivider = true
+                )
+                IosListRow(
+                    title = stringResource(R.string.home_feature_web_title),
+                    subtitle = stringResource(R.string.home_feature_web_desc),
+                    icon = Icons.Default.Bolt,
+                    iconBgColor = IosSystemBlue,
+                    showDivider = true
+                )
+                IosListRow(
+                    title = stringResource(R.string.home_feature_passport_title),
+                    subtitle = stringResource(R.string.home_feature_passport_desc),
+                    icon = Icons.Default.CheckCircle,
+                    iconBgColor = IosSystemPurple,
+                    showDivider = false
+                )
             }
-        }
-    }
-}
-
-@Composable
-private fun SampleChip(
-    icon: String,
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
-        color = ElegantSurface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, ElegantOutline)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = icon, fontSize = 14.sp)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 10.sp
-                ),
-                color = ElegantTextPrimary,
-                maxLines = 1
-            )
         }
     }
 }

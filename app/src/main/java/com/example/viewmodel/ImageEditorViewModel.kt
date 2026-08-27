@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 data class EditorUiState(
     val currentTab: NavigationTab = NavigationTab.HOME,
@@ -85,20 +86,23 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
     private val redoStack = mutableListOf<HistorySnapshot>()
 
     init {
-        // Preload sample image for instant home office playground
+        Timber.tag(TAG).i("ImageEditorViewModel initialized, preloading default sample")
         loadSampleImage("receipt")
     }
 
     fun setTab(tab: NavigationTab) {
+        Timber.tag(TAG).d("Tab changed to: %s", tab.name)
         _uiState.update { it.copy(currentTab = tab) }
     }
 
     fun setActiveTool(tool: EditTool?) {
+        Timber.tag(TAG).d("Active tool changed to: %s", tool?.name ?: "None")
         _uiState.update { it.copy(activeTool = tool) }
     }
 
     fun loadSampleImage(sampleType: String) {
         viewModelScope.launch {
+            Timber.tag(TAG).i("Loading sample image: %s", sampleType)
             _uiState.update { it.copy(isLoading = true) }
             val bitmap = withContext(Dispatchers.Default) {
                 when (sampleType) {
@@ -124,13 +128,21 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
 
     fun loadImageFromUri(uri: Uri) {
         viewModelScope.launch {
+            Timber.tag(TAG).i("Loading user image from URI")
             _uiState.update { it.copy(isLoading = true) }
             val context = getApplication<Application>()
             val bitmap = BitmapProcessor.loadBitmapFromUri(context, uri)
             if (bitmap != null) {
                 setNewImage(bitmap)
-                _uiState.update { it.copy(isLoading = false, currentTab = NavigationTab.STUDIO, statusMessage = "Image loaded (${bitmap.width}×${bitmap.height} px)") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        currentTab = NavigationTab.STUDIO,
+                        statusMessage = "Image loaded (${bitmap.width}×${bitmap.height} px)"
+                    )
+                }
             } else {
+                Timber.tag(TAG).w("Failed to load user image from URI")
                 _uiState.update { it.copy(isLoading = false, statusMessage = "Could not load image") }
             }
         }
@@ -140,6 +152,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         undoStack.clear()
         redoStack.clear()
         val origEstBytes = BitmapProcessor.estimateFileSize(bitmap, ExportFormat.JPEG, 95)
+        Timber.tag(TAG).i("New image configured: %dx%d px (~%d bytes)", bitmap.width, bitmap.height, origEstBytes)
         _uiState.update {
             it.copy(
                 originalBitmap = bitmap,
@@ -190,6 +203,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         redoStack.add(currentSnapshot)
 
         val previous = undoStack.removeAt(undoStack.size - 1)
+        Timber.tag(TAG).d("Undo performed. Remaining history depth: %d", undoStack.size)
         _uiState.update {
             it.copy(
                 currentBaseBitmap = previous.baseBitmap,
@@ -214,6 +228,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         undoStack.add(currentSnapshot)
 
         val next = redoStack.removeAt(redoStack.size - 1)
+        Timber.tag(TAG).d("Redo performed. Remaining redo depth: %d", redoStack.size)
         _uiState.update {
             it.copy(
                 currentBaseBitmap = next.baseBitmap,
@@ -229,6 +244,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
 
     fun resetAllEdits() {
         val orig = _uiState.value.originalBitmap ?: return
+        Timber.tag(TAG).i("Resetting all edits to original base image")
         saveHistory()
         _uiState.update {
             it.copy(
@@ -371,6 +387,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         val w = preset.targetWidth ?: base?.width ?: 800
         val h = preset.targetHeight ?: base?.height ?: 800
 
+        Timber.tag(TAG).i("Applying web preset: %s (target=%dx%d, maxBytes=%s)", preset.title, w, h, preset.maxBytes)
         _uiState.update {
             it.copy(
                 selectedWebPreset = preset,
@@ -410,6 +427,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun setTargetByteSize(targetBytes: Long?) {
+        Timber.tag(TAG).d("Setting target byte size budget: %s", targetBytes)
         _uiState.update { it.copy(selectedTargetBytes = targetBytes) }
         updatePreview()
     }
@@ -462,7 +480,6 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
                     BitmapProcessor.resizeBitmap(marked, scale)
                 }
 
-                // If target byte size compressor is active, auto-tune resolution & quality
                 if (targetBytes != null && targetBytes > 0) {
                     val (autoScaled, autoFmt, autoQ) = BitmapProcessor.compressToTargetBytes(scaled, targetBytes, format)
                     format = autoFmt
@@ -494,6 +511,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
             _uiState.update { it.copy(isProcessing = true) }
             val context = getApplication<Application>()
             val origBytes = _uiState.value.originalEstimatedSizeBytes
+            Timber.tag(TAG).i("Saving edited image to device: %dx%d, format=%s", preview.width, preview.height, _uiState.value.exportFormat)
             val item = BitmapProcessor.saveImageToDevice(
                 context = context,
                 bitmap = preview,
@@ -518,6 +536,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
             val s1 = "Receipt" to SampleImages.createReceiptSample()
             val s2 = "3D_Part" to SampleImages.create3DPrintSample()
             val s3 = "Shipping_Label" to SampleImages.createShippingLabelSample()
+            Timber.tag(TAG).i("Added 3 demo samples to batch queue")
             _uiState.update { it.copy(batchBitmaps = it.batchBitmaps + listOf(s1, s2, s3)) }
         }
     }
@@ -531,6 +550,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         if (list.isEmpty()) return
 
         viewModelScope.launch {
+            Timber.tag(TAG).i("Starting batch conversion for %d images", list.size)
             _uiState.update { it.copy(isBatchProcessing = true, batchProgress = 0f) }
             val context = getApplication<Application>()
             val newSaved = mutableListOf<SavedImageItem>()
@@ -549,6 +569,7 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
                 _uiState.update { it.copy(batchProgress = (i + 1).toFloat() / list.size) }
             }
 
+            Timber.tag(TAG).i("Batch processing completed: %d files saved", newSaved.size)
             _uiState.update {
                 it.copy(
                     isBatchProcessing = false,
@@ -566,5 +587,9 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
             bytes < 1024 * 1024 -> "${bytes / 1024} KB"
             else -> String.format("%.2f MB", bytes.toDouble() / (1024 * 1024))
         }
+    }
+
+    companion object {
+        private const val TAG = "EditorVM"
     }
 }

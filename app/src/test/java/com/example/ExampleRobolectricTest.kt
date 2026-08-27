@@ -31,7 +31,7 @@ class ExampleRobolectricTest {
   fun `test passport dimension resizing`() {
     val sample = SampleImages.createPassportPortraitSample()
     assertNotNull(sample)
-    val resized = BitmapProcessor.resizeToDimensions(sample, 600, 600, maintainAspectRatio = false)
+    val resized = BitmapProcessor.resizeToDimensions(sample, 600, 600, maintainAspect = false)
     assertEquals(600, resized.width)
     assertEquals(600, resized.height)
   }
@@ -42,8 +42,8 @@ class ExampleRobolectricTest {
     assertNotNull(rawPhoto)
     val targetBytes = 500 * 1024L
     val (compressed, format, quality) = BitmapProcessor.compressToTargetBytes(
-      bitmap = rawPhoto,
-      maxBytes = targetBytes,
+      source = rawPhoto,
+      targetBytes = targetBytes,
       preferredFormat = ExportFormat.WEBP
     )
     assertNotNull(compressed)
@@ -62,5 +62,26 @@ class ExampleRobolectricTest {
     )
     assertNotNull(filtered)
     assertEquals(receipt.width, filtered.width)
+    assertEquals(receipt.height, filtered.height)
+  }
+
+  @Test
+  fun `test geometry rotation and flip operations`() {
+    val src = Bitmap.createBitmap(400, 200, Bitmap.Config.ARGB_8888)
+    val rotated = BitmapProcessor.rotateBitmap(src, 90f)
+    assertEquals(200, rotated.width)
+    assertEquals(400, rotated.height)
+
+    val flipped = BitmapProcessor.flipBitmap(src, horizontal = true, vertical = false)
+    assertEquals(400, flipped.width)
+    assertEquals(200, flipped.height)
+  }
+
+  @Test
+  fun `test crop bitmap with normalized coordinates`() {
+    val src = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888)
+    val cropped = BitmapProcessor.cropBitmap(src, 0.1f, 0.1f, 0.9f, 0.9f)
+    assertEquals(400, cropped.width)
+    assertEquals(400, cropped.height)
   }
 }

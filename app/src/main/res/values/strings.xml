@@ -1,3 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App Identity -->
     <string name="app_name">ImageKit</string>
+    <string name="app_tagline">Pocket Photo &amp; Document Studio</string>
+    <string name="app_subtitle">Pocket Editor</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_home">Home</string>
+    <string name="nav_studio">Studio</string>
+    <string name="nav_batch">Batch</string>
+    <string name="nav_library">Library</string>
+
+    <!-- Home Screen -->
+    <string name="home_hero_title">Open Photo or Document</string>
+    <string name="home_hero_subtitle">Tap to import from device photo gallery</string>
+    <string name="home_section_quick_tools">Quick Studio Tools</string>
+    <string name="home_section_samples">Home Office Playground</string>
+    <string name="home_samples_subtitle">Try instant test photos &amp; scans</string>
+    <string name="home_features_title">Pro Mobile Capabilities</string>
+    <string name="home_feature_offline_title">100% Offline &amp; Private</string>
+    <string name="home_feature_offline_desc">All image processing runs on-device. No telemetry or cloud uploads.</string>
+    <string name="home_feature_web_title">Web Upload Optimizer</string>
+    <string name="home_feature_web_desc">Strict target file byte budgeting to defeat HTTP 413 upload rejection.</string>
+    <string name="home_feature_passport_title">Passport &amp; Visa Standard</string>
+    <string name="home_feature_passport_desc">Exact 600×600 px dimensions with &lt; 240 KB byte compression.</string>
+    <string name="home_feature_cleaner_title">Doc &amp; Receipt Cleaner</string>
+    <string name="home_feature_cleaner_desc">Binarize murky shadows and pop colored ink on receipts &amp; invoices.</string>
+
+    <!-- Tool Names and Descriptions -->
+    <string name="tool_web_optimizer">HTML &amp; Web Optimizer</string>
+    <string name="tool_web_optimizer_desc">Passport, web form &amp; target size compressor</string>
+    <string name="tool_crop_rotate">Crop &amp; Orient</string>
+    <string name="tool_crop_rotate_desc">Passport 2×2, Document A4, Rotate &amp; Flip</string>
+    <string name="tool_filters">Doc &amp; Lens Filter</string>
+    <string name="tool_filters_desc">Receipt cleaner, whiteboard, magic color</string>
+    <string name="tool_auto_clarity">Auto-Clarity</string>
+    <string name="tool_auto_clarity_desc">One-tap desk exposure &amp; shadow balance</string>
+    <string name="tool_adjustments">Adjustments</string>
+    <string name="tool_adjustments_desc">Brightness, contrast, saturation &amp; warmth</string>
+    <string name="tool_redact_markup">Privacy &amp; Markup</string>
+    <string name="tool_redact_markup_desc">Blackout, pixelate &amp; annotate</string>
+
+    <!-- Studio Editor Top Bar & Controls -->
+    <string name="action_cancel">Cancel</string>
+    <string name="action_revert">Revert</string>
+    <string name="action_compare">Compare</string>
+    <string name="action_save">Save</string>
+    <string name="action_done">Done</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_redo">Redo</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_apply">Apply</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_export">Export</string>
+    <string name="action_open_gallery">Open Photo</string>
+    <string name="action_share">Share</string>
+    <string name="action_copy">Copy</string>
+
+    <!-- Compare Overlay -->
+    <string name="compare_hold_prompt">HOLD TO REVEAL ORIGINAL</string>
+    <string name="compare_original_label">ORIGINAL</string>
+    <string name="compare_edited_label">EDITED</string>
+
+    <!-- Web Presets & Optimizer -->
+    <string name="export_estimated_size">Estimated Output Size</string>
+    <string name="export_web_presets_header">HTML &amp; Web Upload Presets</string>
+    <string name="export_target_size_header">Auto-Fit Target Size Budget</string>
+    <string name="export_target_size_footer">Compresses image file down to strictly meet upload limits</string>
+    <string name="export_format_header">Output Format</string>
+    <string name="export_scale_header">Resolution Downscale</string>
+    <string name="export_quality_header">Compression Quality</string>
+    <string name="export_quality_compression">Quality Level</string>
+    <string name="web_presets_header">HTML &amp; Web Upload Presets</string>
+    <string name="target_budget_header">Auto-Fit Target Size Budget</string>
+    <string name="clear_limit">Clear Limit</string>
+    <string name="dimensions_scale_header">Dimensions &amp; Scale</string>
+    <string name="use_scale_pct">Use % Scale</string>
+    <string name="use_custom_px">Custom Px Size</string>
+    <string name="output_format_header">Output Format</string>
+    <string name="webp_hint">WebP provides smallest web file size</string>
+    <string name="compression_quality">Compression Quality</string>
+    <string name="estimated_output_size">ESTIMATED OUTPUT SIZE</string>
+    <string name="size_savings_badge">%1$d%% smaller</string>
+    <string name="from_original_size">from %1$s</string>
+    <string name="width_px_label">Width px</string>
+    <string name="height_px_label">Height px</string>
+    <string name="maintain_aspect_ratio">Lock Aspect Ratio</string>
+
+    <!-- Adjustments -->
+    <string name="adjustments_light_header">Light &amp; Tone</string>
+    <string name="adjustments_color_header">Color &amp; Temperature</string>
+    <string name="adjustments_detail_header">Detail &amp; Vignette</string>
+    <string name="adj_brightness">Brightness</string>
+    <string name="adj_contrast">Contrast</string>
+    <string name="adj_saturation">Saturation</string>
+    <string name="adj_warmth">Warmth</string>
+    <string name="adj_vignette">Vignette</string>
+    <string name="adj_sharpen">Sharpen</string>
+    <string name="adj_reset_button">Reset All Adjustments</string>
+    <string name="adj_reset_all">Reset Adjustments</string>
+
+    <!-- Crop & Transform -->
+    <string name="aspect_ratio_header">Aspect Ratio Presets</string>
+    <string name="orientation_header">Orientation &amp; Flip</string>
+    <string name="rotate_left">Rotate -90°</string>
+    <string name="rotate_right">Rotate +90°</string>
+    <string name="flip_horizontal">Flip Horizontal</string>
+    <string name="flip_vertical">Flip Vertical</string>
+    <string name="apply_crop_button">Apply Crop</string>
+    <string name="reset_crop">Reset Crop</string>
+
+    <!-- Redactions & Markups -->
+    <string name="markup_tools_header">Privacy &amp; Markup Tools</string>
+    <string name="markup_tap_instruction">Tap image canvas to place redactions or drag to position.</string>
+    <string name="markup_blackout">Blackout</string>
+    <string name="markup_pixelate">Pixelate</string>
+    <string name="markup_blur">Blur Box</string>
+    <string name="markup_highlight">Highlight</string>
+    <string name="markup_arrow">Arrow Callout</string>
+    <string name="markup_text">Text Note</string>
+    <string name="markup_clear_all">Clear All Markups</string>
+    <string name="markup_custom_text_prompt">Enter Note Text</string>
+
+    <!-- Batch Processing Screen -->
+    <string name="batch_title">Batch Converter</string>
+    <string name="batch_subtitle">Multi-Image Optimization Queue</string>
+    <string name="batch_queue_count">%1$d Images Queued</string>
+    <string name="batch_add_samples">Add Demo Queue</string>
+    <string name="batch_import_multiple">Import Images</string>
+    <string name="batch_clear_queue">Clear Queue</string>
+    <string name="batch_settings_title">Batch Output Settings</string>
+    <string name="batch_scale_label">Resolution Downscale</string>
+    <string name="batch_format_label">Target File Format</string>
+    <string name="batch_quality_label">Compression Quality</string>
+    <string name="batch_start_button">Process &amp; Convert All</string>
+    <string name="batch_processing_status">Processing Image %1$d of %2$d…</string>
+    <string name="batch_empty_title">Queue is Empty</string>
+    <string name="batch_empty_desc">Select multiple photos or add sample images to batch resize and convert in bulk.</string>
+
+    <!-- Library Screen -->
+    <string name="library_title">Library</string>
+    <string name="library_subtitle">Saved Exports &amp; Optimizations</string>
+    <string name="library_empty_title">No Saved Images Yet</string>
+    <string name="library_empty_desc">Optimized photos and clean document scans will appear here automatically.</string>
+    <string name="library_saved_count">%1$d Exports</string>
+    <string name="library_total_savings">Saved %1$s storage</string>
+    <string name="library_view_in_editor">Edit in Studio</string>
+
+    <!-- Status Messages & Placeholders -->
+    <string name="status_loaded_sample">Loaded %1$s Sample</string>
+    <string name="status_image_loaded">Image loaded (%1$d×%2$d px)</string>
+    <string name="status_load_failed">Could not load image</string>
+    <string name="status_cropped">Cropped to %1$d×%2$d px</string>
+    <string name="status_preset_applied">Applied preset: %1$s</string>
+    <string name="status_reset_original">Reset to original image</string>
+    <string name="status_saved_success">Saved to Gallery &amp; Library! (%1$s)</string>
+    <string name="status_batch_completed">Batch completed! Processed %1$d images.</string>
 </resources>

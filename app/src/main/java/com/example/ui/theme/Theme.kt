@@ -10,47 +10,47 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val ElegantDarkColorScheme = darkColorScheme(
-    primary = ElegantPrimary,
-    onPrimary = ElegantOnPrimary,
-    primaryContainer = ElegantPrimaryContainer,
-    onPrimaryContainer = ElegantOnPrimaryContainer,
-    secondary = ElegantSecondary,
-    onSecondary = ElegantOnSecondary,
-    secondaryContainer = ElegantSecondaryContainer,
-    onSecondaryContainer = ElegantOnSecondaryContainer,
-    tertiary = ElegantTertiary,
-    onTertiary = ElegantOnTertiary,
-    tertiaryContainer = ElegantTertiaryContainer,
-    onTertiaryContainer = ElegantOnTertiaryContainer,
-    background = ElegantBackground,
-    onBackground = ElegantTextPrimary,
-    surface = ElegantSurface,
-    onSurface = ElegantTextPrimary,
-    surfaceVariant = ElegantSurfaceVariant,
-    onSurfaceVariant = ElegantTextSecondary,
-    surfaceContainer = ElegantSurfaceContainer,
-    surfaceContainerHigh = ElegantSurfaceContainerHigh,
-    outline = ElegantOutline,
-    outlineVariant = ElegantOutlineVariant,
-    error = ElegantError,
-    onError = ElegantOnError
+private val IosDarkColorScheme = darkColorScheme(
+    primary = IosSystemBlue,
+    onPrimary = IosLabelPrimary,
+    primaryContainer = IosTertiarySystemBackgroundDark,
+    onPrimaryContainer = IosLabelPrimary,
+    secondary = IosSystemTeal,
+    onSecondary = IosSystemBackgroundDark,
+    secondaryContainer = IosSecondarySystemBackgroundDark,
+    onSecondaryContainer = IosLabelPrimary,
+    tertiary = IosSystemGreen,
+    onTertiary = IosSystemBackgroundDark,
+    tertiaryContainer = IosTertiarySystemBackgroundDark,
+    onTertiaryContainer = IosLabelPrimary,
+    background = IosSystemBackgroundDark,
+    onBackground = IosLabelPrimary,
+    surface = IosSecondarySystemBackgroundDark,
+    onSurface = IosLabelPrimary,
+    surfaceVariant = IosTertiarySystemBackgroundDark,
+    onSurfaceVariant = IosLabelSecondary,
+    surfaceContainer = IosSecondarySystemBackgroundDark,
+    surfaceContainerHigh = IosTertiarySystemBackgroundDark,
+    outline = IosSeparatorOpaque,
+    outlineVariant = IosSeparator,
+    error = IosSystemRed,
+    onError = IosLabelPrimary
 )
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = true, // Elegant Dark as primary theme
-    dynamicColor: Boolean = false, // Keep Elegant Dark styling consistent
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = ElegantDarkColorScheme
+    val colorScheme = IosDarkColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                window.statusBarColor = ElegantBackground.toArgb()
-                window.navigationBarColor = ElegantBottomNav.toArgb()
+                window.statusBarColor = IosSystemBackgroundDark.toArgb()
+                window.navigationBarColor = IosSystemBackgroundDark.toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
                 WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
             }
