@@ -3,6 +3,7 @@ package com.curiositygarage.imagekit.ui.screens.editor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -59,6 +60,7 @@ fun AspectRatioPicker(
     onRotate: (Float) -> Unit,
     onFlip: (Boolean, Boolean) -> Unit,
     onApplyCrop: () -> Unit,
+    onResetCrop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptics = LocalHapticFeedback.current
@@ -67,14 +69,47 @@ fun AspectRatioPicker(
         modifier = modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        // Manual Crop Hint Banner
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = CircleShape,
+            color = IosTertiarySystemBackgroundDark,
+            border = BorderStroke(0.5.dp, IosSeparatorOpaque)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Crop,
+                    contentDescription = null,
+                    tint = IosSystemBlue,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Drag the 8 corner and edge handles on the image to crop manually",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = IosLabelSecondary
+                )
+            }
+        }
+
+        // Aspect Ratio Presets
         IosGroupedCard(header = stringResource(R.string.aspect_ratio_header)) {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = 10.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -100,18 +135,19 @@ fun AspectRatioPicker(
                                 letterSpacing = (-0.1).sp
                             ),
                             color = if (isSelected) Color.White else IosLabelPrimary,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                         )
                     }
                 }
             }
         }
 
+        // Orientation Controls
         IosGroupedCard(header = stringResource(R.string.orientation_header)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TransformIconButton(
@@ -141,28 +177,61 @@ fun AspectRatioPicker(
             }
         }
 
-        Button(
-            onClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                onApplyCrop()
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = IosSystemBlue),
-            shape = CircleShape,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .testTag("apply_crop_button")
+        // Actions Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Icon(imageVector = Icons.Default.Crop, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.apply_crop_button),
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.1).sp
-                ),
-                color = Color.White
-            )
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onResetCrop()
+                    }
+                    .testTag("reset_crop_button"),
+                shape = CircleShape,
+                color = IosTertiarySystemBackgroundDark,
+                border = BorderStroke(0.5.dp, IosSeparatorOpaque)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "Reset Crop",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        ),
+                        color = IosLabelPrimary
+                    )
+                }
+            }
+
+            Button(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onApplyCrop()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = IosSystemBlue),
+                shape = CircleShape,
+                modifier = Modifier
+                    .weight(1.5f)
+                    .height(44.dp)
+                    .testTag("apply_crop_button")
+            ) {
+                Icon(imageVector = Icons.Default.Crop, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.apply_crop_button),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        letterSpacing = (-0.1).sp
+                    ),
+                    color = Color.White
+                )
+            }
         }
     }
 }

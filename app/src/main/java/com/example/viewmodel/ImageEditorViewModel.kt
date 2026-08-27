@@ -291,28 +291,53 @@ class ImageEditorViewModel(application: Application) : AndroidViewModel(applicat
         val base = _uiState.value.currentBaseBitmap ?: return
         val imgRatio = base.width.toFloat() / base.height.toFloat()
 
-        val newRect = if (preset.ratio != null) {
-            val targetRatio = preset.ratio
-            if (imgRatio > targetRatio) {
-                // Image is wider than target ratio: crop sides
-                val normWidth = targetRatio / imgRatio
-                val left = (1f - normWidth) / 2f
-                androidx.compose.ui.geometry.Rect(left, 0f, left + normWidth, 1f)
-            } else {
-                // Image is taller than target ratio: crop top/bottom
-                val normHeight = imgRatio / targetRatio
-                val top = (1f - normHeight) / 2f
-                androidx.compose.ui.geometry.Rect(0f, top, 1f, top + normHeight)
+        val newRect = when {
+            preset == AspectRatioPreset.ORIGINAL || preset.ratio == -1.0f -> {
+                androidx.compose.ui.geometry.Rect(0f, 0f, 1f, 1f)
             }
-        } else {
-            androidx.compose.ui.geometry.Rect(0f, 0f, 1f, 1f)
+            preset == AspectRatioPreset.FREE || preset.ratio == null -> {
+                // Freeform manual crop mode
+                if (_uiState.value.cropRectNorm.width > 0.98f && _uiState.value.cropRectNorm.height > 0.98f) {
+                    androidx.compose.ui.geometry.Rect(0.08f, 0.08f, 0.92f, 0.92f)
+                } else {
+                    _uiState.value.cropRectNorm
+                }
+            }
+            else -> {
+                val targetRatio = preset.ratio
+                if (imgRatio > targetRatio) {
+                    // Image is wider than target ratio: crop sides
+                    val normWidth = targetRatio / imgRatio
+                    val left = (1f - normWidth) / 2f
+                    androidx.compose.ui.geometry.Rect(left, 0f, (left + normWidth).coerceAtMost(1f), 1f)
+                } else {
+                    // Image is taller than target ratio: crop top/bottom
+                    val normHeight = imgRatio / targetRatio
+                    val top = (1f - normHeight) / 2f
+                    androidx.compose.ui.geometry.Rect(0f, top, 1f, (top + normHeight).coerceAtMost(1f))
+                }
+            }
         }
 
         _uiState.update { it.copy(cropRectNorm = newRect) }
     }
 
     fun updateCropRect(rect: androidx.compose.ui.geometry.Rect) {
-        _uiState.update { it.copy(cropRectNorm = rect) }
+        _uiState.update { 
+            it.copy(
+                cropRectNorm = rect,
+                selectedAspectRatio = AspectRatioPreset.FREE
+            ) 
+        }
+    }
+
+    fun resetCropRect() {
+        _uiState.update {
+            it.copy(
+                cropRectNorm = androidx.compose.ui.geometry.Rect(0f, 0f, 1f, 1f),
+                selectedAspectRatio = AspectRatioPreset.ORIGINAL
+            )
+        }
     }
 
     fun applyCrop() {

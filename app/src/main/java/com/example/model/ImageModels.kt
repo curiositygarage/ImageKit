@@ -21,7 +21,8 @@ enum class EditTool(val label: String, val description: String) {
 }
 
 enum class AspectRatioPreset(val label: String, val ratio: Float?) {
-    FREE("Free", null),
+    FREE("Manual (Freeform)", null),
+    ORIGINAL("Original", -1.0f),
     PASSPORT_2_2("Passport 2×2 (1:1)", 1.0f),
     VISA_3_4("Visa / ID (3:4)", 3f / 4f),
     DOC_A4("A4 / Letter", 1f / 1.414f),

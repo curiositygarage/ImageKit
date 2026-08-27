@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -83,7 +84,6 @@ import com.curiositygarage.imagekit.ui.theme.IosTertiarySystemBackgroundDark
 import com.curiositygarage.imagekit.viewmodel.EditorUiState
 import com.curiositygarage.imagekit.viewmodel.ImageEditorViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudioEditorScreen(
     viewModel: ImageEditorViewModel,
@@ -91,7 +91,6 @@ fun StudioEditorScreen(
     modifier: Modifier = Modifier
 ) {
     val haptics = LocalHapticFeedback.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Column(
         modifier = modifier
@@ -144,6 +143,133 @@ fun StudioEditorScreen(
             }
         }
 
+        // Active Tool Docked Bottom Panel (Canvas above remains 100% interactive and unblocked!)
+        AnimatedVisibility(
+            visible = uiState.activeTool != null,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut() + slideOutVertically { it / 2 }
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 290.dp),
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                color = Color(0xF21C1C1E),
+                border = BorderStroke(0.5.dp, IosSeparatorOpaque)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp)
+                ) {
+                    // Grabber indicator & panel header
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .width(36.dp)
+                                .height(4.dp),
+                            shape = CircleShape,
+                            color = IosLabelTertiary
+                        ) {}
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = uiState.activeTool?.label ?: "",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp,
+                                letterSpacing = (-0.2).sp
+                            ),
+                            color = IosLabelPrimary
+                        )
+
+                        IosCapsuleButton(
+                            text = "Done",
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                viewModel.setActiveTool(null)
+                            },
+                            isPrimary = false
+                        )
+                    }
+
+                    // Tool specific contents
+                    when (uiState.activeTool) {
+                        EditTool.RESIZE_CONVERT -> {
+                            ExportOptionsPanel(
+                                selectedWebPreset = uiState.selectedWebPreset,
+                                onApplyWebPreset = { viewModel.applyWebUploadPreset(it) },
+                                selectedTargetBytes = uiState.selectedTargetBytes,
+                                onTargetBytesSelected = { viewModel.setTargetByteSize(it) },
+                                isCustomDimensionMode = uiState.isCustomDimensionMode,
+                                onCustomDimensionModeToggle = { viewModel.setCustomDimensionMode(it) },
+                                customWidth = uiState.customWidth,
+                                customHeight = uiState.customHeight,
+                                maintainAspectRatio = uiState.maintainAspectRatio,
+                                onCustomDimensionsChange = { w, h, keep -> viewModel.setCustomDimensions(w, h, keep) },
+                                resizeScale = uiState.resizeScale,
+                                onResizeScaleChange = { viewModel.setResizeScale(it) },
+                                exportFormat = uiState.exportFormat,
+                                onExportFormatChange = { viewModel.setExportFormat(it) },
+                                exportQuality = uiState.exportQuality,
+                                onExportQualityChange = { viewModel.setExportQuality(it) },
+                                estimatedSizeBytes = uiState.estimatedSizeBytes,
+                                originalSizeBytes = uiState.originalEstimatedSizeBytes
+                            )
+                        }
+                        EditTool.CROP_ROTATE -> {
+                            AspectRatioPicker(
+                                selectedRatio = uiState.selectedAspectRatio,
+                                onRatioSelected = { viewModel.setAspectRatio(it) },
+                                onRotate = { viewModel.rotate(it) },
+                                onFlip = { h, v -> viewModel.flip(h, v) },
+                                onApplyCrop = {
+                                    viewModel.applyCrop()
+                                    viewModel.setActiveTool(null)
+                                },
+                                onResetCrop = { viewModel.resetCropRect() }
+                            )
+                        }
+                        EditTool.FILTERS -> {
+                            FilterStrip(
+                                selectedFilter = uiState.selectedFilter,
+                                onFilterSelected = { viewModel.setFilter(it) }
+                            )
+                        }
+                        EditTool.ADJUST -> {
+                            AdjustmentSliderPanel(
+                                adjustments = uiState.adjustments,
+                                onAdjustmentsChanged = { viewModel.updateAdjustments(it) },
+                                onResetAdjustments = { viewModel.updateAdjustments(com.curiositygarage.imagekit.model.Adjustments()) }
+                            )
+                        }
+                        EditTool.REDACT_MARKUP -> {
+                            MarkupToolbar(
+                                activeMarkupType = uiState.activeMarkupType,
+                                onMarkupTypeSelected = { viewModel.setActiveMarkupType(it) },
+                                markups = uiState.markups,
+                                onRemoveMarkup = { viewModel.removeMarkup(it) },
+                                onClearMarkups = { viewModel.clearMarkups() }
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+
         // Apple Photos-style Bottom Tool Dock
         StudioToolDock(
             activeTool = uiState.activeTool,
@@ -155,127 +281,6 @@ fun StudioEditorScreen(
                 }
             }
         )
-    }
-
-    // iOS-Style Modal Bottom Sheet for Active Tools
-    if (uiState.activeTool != null) {
-        ModalBottomSheet(
-            onDismissRequest = { viewModel.setActiveTool(null) },
-            sheetState = sheetState,
-            containerColor = Color(0xF21C1C1E),
-            scrimColor = Color.Black.copy(alpha = 0.4f),
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .width(36.dp)
-                            .height(5.dp),
-                        shape = CircleShape,
-                        color = IosLabelTertiary
-                    ) {}
-                }
-            }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 28.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = uiState.activeTool?.label ?: "",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp,
-                            letterSpacing = (-0.3).sp
-                        ),
-                        color = IosLabelPrimary
-                    )
-
-                    IosCapsuleButton(
-                        text = "Done",
-                        onClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            viewModel.setActiveTool(null)
-                        },
-                        isPrimary = false
-                    )
-                }
-
-                // Tool-specific options view inside iOS Bottom Sheet
-                when (uiState.activeTool) {
-                    EditTool.RESIZE_CONVERT -> {
-                        ExportOptionsPanel(
-                            selectedWebPreset = uiState.selectedWebPreset,
-                            onApplyWebPreset = { viewModel.applyWebUploadPreset(it) },
-                            selectedTargetBytes = uiState.selectedTargetBytes,
-                            onTargetBytesSelected = { viewModel.setTargetByteSize(it) },
-                            isCustomDimensionMode = uiState.isCustomDimensionMode,
-                            onCustomDimensionModeToggle = { viewModel.setCustomDimensionMode(it) },
-                            customWidth = uiState.customWidth,
-                            customHeight = uiState.customHeight,
-                            maintainAspectRatio = uiState.maintainAspectRatio,
-                            onCustomDimensionsChange = { w, h, keep -> viewModel.setCustomDimensions(w, h, keep) },
-                            resizeScale = uiState.resizeScale,
-                            onResizeScaleChange = { viewModel.setResizeScale(it) },
-                            exportFormat = uiState.exportFormat,
-                            onExportFormatChange = { viewModel.setExportFormat(it) },
-                            exportQuality = uiState.exportQuality,
-                            onExportQualityChange = { viewModel.setExportQuality(it) },
-                            estimatedSizeBytes = uiState.estimatedSizeBytes,
-                            originalSizeBytes = uiState.originalEstimatedSizeBytes
-                        )
-                    }
-                    EditTool.CROP_ROTATE -> {
-                        AspectRatioPicker(
-                            selectedRatio = uiState.selectedAspectRatio,
-                            onRatioSelected = { viewModel.setAspectRatio(it) },
-                            onRotate = { viewModel.rotate(it) },
-                            onFlip = { h, v -> viewModel.flip(h, v) },
-                            onApplyCrop = {
-                                viewModel.applyCrop()
-                                viewModel.setActiveTool(null)
-                            }
-                        )
-                    }
-                    EditTool.FILTERS -> {
-                        FilterStrip(
-                            selectedFilter = uiState.selectedFilter,
-                            onFilterSelected = { viewModel.setFilter(it) }
-                        )
-                    }
-                    EditTool.ADJUST -> {
-                        AdjustmentSliderPanel(
-                            adjustments = uiState.adjustments,
-                            onAdjustmentsChanged = { viewModel.updateAdjustments(it) },
-                            onResetAdjustments = { viewModel.updateAdjustments(com.curiositygarage.imagekit.model.Adjustments()) }
-                        )
-                    }
-                    EditTool.REDACT_MARKUP -> {
-                        MarkupToolbar(
-                            activeMarkupType = uiState.activeMarkupType,
-                            onMarkupTypeSelected = { viewModel.setActiveMarkupType(it) },
-                            markups = uiState.markups,
-                            onRemoveMarkup = { viewModel.removeMarkup(it) },
-                            onClearMarkups = { viewModel.clearMarkups() }
-                        )
-                    }
-                    else -> {}
-                }
-            }
-        }
     }
 }
 

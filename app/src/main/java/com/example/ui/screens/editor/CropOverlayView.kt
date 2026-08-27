@@ -40,7 +40,7 @@ fun CropOverlayView(
                             cropRectNorm.right * w,
                             cropRectNorm.bottom * h
                         )
-                        val touchRadius = 40.dp.toPx()
+                        val touchRadius = 48.dp.toPx()
 
                         activeHandle = when {
                             (offset - Offset(r.left, r.top)).getDistance() < touchRadius -> CropHandle.TOP_LEFT
@@ -158,6 +158,20 @@ fun CropOverlayView(
         // Bottom Right
         drawLine(hColor, Offset(right, bottom), Offset(right - handleLen, bottom), strokeWidth = handleStroke)
         drawLine(hColor, Offset(right, bottom), Offset(right, bottom - handleLen), strokeWidth = handleStroke)
+
+        // Center Edge Bars for intuitive manual crop resizing
+        val edgeLen = 16.dp.toPx()
+        val centerX = (left + right) / 2f
+        val centerY = (top + bottom) / 2f
+
+        // Top Edge Center
+        drawLine(hColor, Offset(centerX - edgeLen, top), Offset(centerX + edgeLen, top), strokeWidth = handleStroke)
+        // Bottom Edge Center
+        drawLine(hColor, Offset(centerX - edgeLen, bottom), Offset(centerX + edgeLen, bottom), strokeWidth = handleStroke)
+        // Left Edge Center
+        drawLine(hColor, Offset(left, centerY - edgeLen), Offset(left, centerY + edgeLen), strokeWidth = handleStroke)
+        // Right Edge Center
+        drawLine(hColor, Offset(right, centerY - edgeLen), Offset(right, centerY + edgeLen), strokeWidth = handleStroke)
     }
 }
 
