@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Camera/Editor frame container -->
+    <path
+        android:fillColor="#2E3033"
+        android:strokeColor="#44474E"
+        android:strokeWidth="1.5"
+        android:pathData="M32,28 L76,28 A6,6 0 0,1 82,34 L82,74 A6,6 0 0,1 76,80 L32,80 A6,6 0 0,1 26,74 L26,34 A6,6 0 0,1 32,28 Z" />
+    
+    <!-- Mountain/Landscape shape -->
+    <path
+        android:fillColor="#004A77"
+        android:pathData="M27,74 L42,54 L52,66 L64,48 L81,74 Z" />
+    
+    <!-- Sun/Aperture circle with accent -->
+    <path
+        android:fillColor="#D0E4FF"
+        android:pathData="M40,42 A5,5 0 1,1 40,42.01 Z" />
+        
+    <!-- Crop corner accents in bright primary -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#D0E4FF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M23,38 L23,25 L36,25 M72,25 L85,25 L85,38 M85,70 L85,83 L72,83 M36,83 L23,83 L23,70" />
+
+    <!-- Sparkle edit star -->
+    <path
+        android:fillColor="#D0E4FF"
+        android:pathData="M68,36 L70,30 L72,36 L78,38 L72,40 L70,46 L68,40 L62,38 Z" />
+</vector>
