@@ -24,7 +24,8 @@ ImageKit Studio is a high-performance, **100% offline**, native Android image pr
    - [Bitmap Processing Engine (`BitmapProcessor.kt`)](#bitmap-processing-engine-bitmapprocessorkt)
 5. [Storage, Privacy & Telemetry / Logging Architecture](#storage-privacy--telemetry--logging-architecture)
 6. [Testing, Build, and Verification](#testing-build-and-verification)
-7. [Contributing & Development Guidelines](#contributing--development-guidelines)
+7. [Building Locally](#building-locally)
+8. [License & Credits](#license--credits)
 
 ---
 
@@ -216,6 +217,45 @@ gradle assembleDebug
 - **Emoji Elimination**: UI layer contains zero Unicode emoji characters in text strings, resource XMLs, and data classes.
 - **Accessibility**: All interactive elements maintain touch targets >= 48dp with semantic `testTag` descriptors (e.g., `testTag("nav_tab_home")`, `testTag("apply_crop_button")`).
 - **Memory Safety**: `Bitmap.recycle()` is managed properly to prevent OOM errors during high-resolution processing.
+
+---
+
+## Building Locally
+
+### Prerequisites (not in the repo — add your own)
+The repo intentionally gitignores machine-specific files. Before building, create these locally:
+
+1. `local.properties` in the project root:
+   ```properties
+   sdk.dir=/path/to/your/Android/Sdk
+   ```
+   (Replace with your actual Android SDK path.)
+   - OR set the `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variable instead.
+
+2. `debug.keystore` in the project root (used by `debugConfig` signing in app/build.gradle.kts).
+   - A fresh debug keystore is auto-created the first time you run a debug build in Android Studio, OR you can generate one with:
+     ```bash
+     keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey \
+       -keypass android -dname "CN=Android Debug,O=Android,C=US"
+     ```
+   - Note: the file is gitignored so it never gets committed.
+
+### Build
+From the project root:
+```bash
+gradle assembleDebug
+```
+This produces the APK at:
+`app/build/outputs/apk/debug/app-debug.apk`
+
+### Install to a connected device
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Notes
+- This is a fully offline app — it does not require any API keys or `.env` credentials. The `.env.example` is optional and unused by default; remove the `signingConfig = signingConfigs.getByName("debugConfig")` line only if you set up release signing, not for local debug builds.
+- If `gradle` is not on your PATH, use the Gradle wrapper (`./gradlew`) or the full path to your Gradle install.
 
 ---
 
