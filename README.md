@@ -1,264 +1,248 @@
-# ImageKit Studio — Offline Image Optimization & Editing Suite for Android
+# ImageKit
 
-ImageKit Studio is a high-performance, **100% offline**, native Android image processing, batch compression, and editing application. Built using modern **Jetpack Compose**, **Kotlin Coroutines**, and **Android Canvas/NDK-grade Bitmap pipelines**, the application delivers an Apple Photos/iOS Human Interface Guidelines (HIG)-inspired design language with zero emoji iconography, translucent grouped surfaces, haptic feedback, and fluid gesture-based interactions.
+A high-performance, **100% offline** native Android image editing suite — built for the
+everyday home-office jobs: optimizing photos for web/HTML upload forms, preparing
+passport & visa photos to exact spec, shrinking large camera shots, cleaning up
+receipts and documents, and redacting personal information before sharing.
+
+Built with **Kotlin** and **Jetpack Compose**, with an Apple iOS/HIG-inspired design
+language (grouped card layouts, a floating glass tab bar, monochrome vector glyphs,
+haptic feedback, and fluid gestures).
 
 ---
 
 ## Table of Contents
 
-1. [Executive Summary & Product Vision](#executive-summary--product-vision)
-2. [Key Capabilities & Feature Specifications](#key-capabilities--feature-specifications)
-   - [Studio Editor](#studio-editor)
-   - [Batch Processing Engine](#batch-processing-engine)
-   - [Library & History Manager](#library--history-manager)
-   - [Sample Workbench Assets](#sample-workbench-assets)
-3. [Design System & UI/UX Architecture](#design-system--uiux-architecture)
-   - [Apple HIG & iOS Redesign Language](#apple-hig--ios-redesign-language)
-   - [Zero-Emoji Vector Glyph Standard](#zero-emoji-vector-glyph-standard)
-   - [Typography & Metric Rhythm](#typography--metric-rhythm)
-   - [Translucent Surfaces & Layering](#translucent-surfaces--layering)
-4. [Technical Architecture & Frameworks](#technical-architecture--frameworks)
-   - [Tech Stack Overview](#tech-stack-overview)
-   - [Core Directory & Package Structure](#core-directory--package-structure)
-   - [State Management & MVVM Data Flow](#state-management--mvvm-data-flow)
-   - [Bitmap Processing Engine (`BitmapProcessor.kt`)](#bitmap-processing-engine-bitmapprocessorkt)
-5. [Storage, Privacy & Telemetry / Logging Architecture](#storage-privacy--telemetry--logging-architecture)
-6. [Testing, Build, and Verification](#testing-build-and-verification)
-7. [Building Locally](#building-locally)
-8. [License & Credits](#license--credits)
+1. [Features](#features)
+2. [How to Use](#how-to-use)
+3. [Requirements](#requirements)
+4. [Building & Running](#building--running)
+5. [Architecture](#architecture)
+6. [Privacy & Logging](#privacy--logging)
+7. [Restrictions & Known Limitations](#restrictions--known-limitations)
+8. [License](#license)
 
 ---
 
-## Executive Summary & Product Vision
+## Features
 
-ImageKit Studio was engineered to solve the everyday mobile bottlenecks of preparing digital assets for online forms, government visa/passport portals, web publishing, messaging platforms, and responsive UI design without sacrificing image quality or user privacy.
+### Studio Editor
+- **Crop & Orient** — freeform 8-handle crop overlay, plus aspect-ratio presets
+  (Passport 2×2, Visa/ID 3:4, A4/Letter, Receipt, 16:9, 4:3, 3:2), 90° rotations,
+  and horizontal/vertical flips.
+- **Optimize** (Resize & Convert) — output as JPEG, PNG, or WebP; compression quality
+  slider; scale by percentage or exact pixel dimensions (aspect-locked); web/HTML
+  presets; and **target-byte compression** (e.g. `< 100 KB`, `< 240 KB`, `< 500 KB`,
+  `< 1 MB`) using a binary-search quality search.
+- **Document & Lens Filters** — Clean Document, Whiteboard Pop, Magic Color,
+  Auto Clarity, B&W Contrast, Vivid, Warm Craft, Cool Slate, and Invert Schematic.
+- **Adjustments** — brightness, contrast, saturation, warmth, vignette, and sharpen.
+- **Privacy & Markup** — blackout boxes, pixelation, blur boxes, highlights, arrow
+  callouts, and text notes drawn directly on the canvas.
+- **Compare** — hold-to-reveal the original while pressed.
 
-### Core Tenets
-- **100% Offline & Private**: Zero network dependencies, no external cloud telemetry, and no unsolicited data transmission. All processing executes on the device's local CPU/GPU cores.
-- **Native iOS Aesthetic & Tactile Polish**: Meticulous implementation of iOS grouped cards, rounded capsule controls, 0.5dp hairline separators, frosted glass bottom bars, and smooth transitions.
-- **Precision Target-Byte Optimization**: Sophisticated binary search compression algorithm that hits strict file size limits (e.g. `< 200 KB` or `< 500 KB` requirements for government upload forms).
-- **Non-Destructive Editing Workflow**: Full support for undo/redo history, before/after split-slider/long-press comparisons, and real-time live preview canvas.
+### Batch Processing
+- Queue multiple images (or the built-in demo samples) and apply one recipe
+  (format, downscale, quality, target size) across all of them, with per-item
+  progress and an aggregate storage-savings summary.
 
----
+### Library
+- A history of saved exports with format, dimensions, size, and timestamp. Each entry
+  can be shared; open the Library empty state to jump back into the Studio.
 
-## Key Capabilities & Feature Specifications
-
-### 1. Studio Editor
-- **Manual Freeform & Standardized Crop**:
-  - Direct 8-handle touch overlay (4 corners + 4 center edge bars) with 48dp minimum touch targets.
-  - Aspect Ratio presets: Freeform, Original, Passport 2×2 (1:1), Visa / ID (3:4), A4 / Letter Document (1:1.414), 16:9 Landscape, 9:16 Story/Reel, 4:3 Classic, 3:2 Photo.
-  - Multi-axis orientation: 90° Clockwise/Counter-Clockwise rotations, Horizontal and Vertical flipping.
-- **Web & Storage Optimization (Resize / Convert)**:
-  - Format converter: JPEG, PNG, and modern WebP.
-  - Compression quality slider (1% to 100%) with live size estimation and savings percentage badge.
-  - Scale multiplier (25%, 50%, 75%, 100%) or manual exact pixel resolution locking with aspect ratio preservation.
-  - Instant Web presets: Web Banner (1920×600), Thumbnail (400×400), Email Attachment (< 1 MB), WebP Max Efficiency.
-  - Government / Visa Target Size Preset buttons: 100 KB, 200 KB, 500 KB, 1 MB, 2 MB with binary search quantization.
-- **Color & Tone Adjustments**:
-  - Live hardware-accelerated adjustments for Brightness (-100 to +100), Contrast (-100 to +100), Saturation (-100 to +100), Temperature / White Balance (-100 to +100), Vignette (0 to 100), and Sharpness (0 to 100).
-- **Artistic Filter Presets**:
-  - Original, Vivid Boost, Dramatic Monochrome, Warm Amber, Cool Marine, Cyberpunk / Neon, Vintage Film, Document B&W Scanner, Sepia Warmth, Invert Negative.
-- **Redaction & Privacy Markup**:
-  - Redaction types: Gaussian Blur Mask, Blackout Solid Box, and Pixelate Censorship.
-  - Tap-and-drag interactive region bounding with deletion handles.
-- **Live Comparison & Canvas Viewport**:
-  - Split-slider interactive comparator.
-  - Hold-to-reveal original button (simulates Apple Photos comparison behavior).
-  - Dynamic aspect-preserving canvas with grid overlay toggles.
-
-### 2. Batch Processing Engine
-- Multi-image selection from internal gallery or synthetic test suites.
-- Universal recipe application: apply unified format conversion (JPEG/PNG/WebP), resolution downscaling, target byte limit, and compression presets across up to 50 photos simultaneously.
-- Asynchronous parallel coroutine worker with per-item progress indicators, error boundaries, aggregate storage savings summary, and single-tap batch export to the local gallery.
-
-### 3. Library & History Manager
-- Grouped list of recent export artifacts with format badges, dimensions, byte sizes, and timestamps.
-- Single-tap reloading back into the studio editor, direct image preview modals, and local disk deletion management.
-
-### 4. Sample Workbench Assets
-- Built-in vector and high-resolution synthetic image generators for instant testing without needing real device photos:
-  - High-Resolution Landscape Sample (HDR mountains, sunset gradients, foreground flora).
-  - High-Contrast Document / Receipt Sample (simulated invoice typography, barcodes, watermarks).
-  - High-Density RAW Workbench Photo (fine detail test patterns, 2400×1600 px target).
+### Built-in Demo Samples
+No real photos required to try it out: built-in procedural samples include a
+passport portrait, a hardware receipt, a high-resolution "raw" desk photo, and a
+shipping label (great for testing redaction).
 
 ---
 
-## Design System & UI/UX Architecture
+## How to Use
 
-### Apple HIG & iOS Redesign Language
-The app follows Apple Human Interface Guidelines implemented in Jetpack Compose:
-- **Grouped Table Layouts**: Rounded inset cards (`RoundedCornerShape(12.dp)`) nestled on high-contrast backgrounds (`Color(0xFF000000)` / `Color(0xFF1C1C1E)`).
-- **Hairline Separators**: Subtle 0.5dp borders (`Color(0x33545458)`) defining boundaries between list rows and control blocks.
-- **Floating Glass Tab Bar**: A pill-shaped floating surface (`Color(0xE61C1C1E)` with `RoundedCornerShape(32.dp)` and 16dp elevation) floating above the Android navigation gesture area with `navigationBarsPadding()`.
-- **Sliding Segmented Controls**: Capsule switchers with animated sliding indicator pills (`Color(0xFF2C2C2E)` active on `Color(0xFF1C1C1E)` base).
-- **Prominent Capsule Buttons**: Full-width action buttons with iOS System Blue (`#0A84FF`), spring press animations, and high-contrast typography.
+ImageKit has four tabs along the bottom: **Home**, **Studio**, **Batch**, and **Library**.
 
-### Zero-Emoji Vector Glyph Standard
-All UI elements and data models strictly use monochromatic, scalable vector icons (`androidx.compose.material.icons` and custom `ImageVector` paths):
-- Navigation: `Icons.Filled.Home`, `Icons.Filled.AutoFixHigh`, `Icons.Filled.Layers`, `Icons.Filled.PhotoLibrary`
-- Editing Tools: `Icons.Default.Crop`, `Icons.Default.Tune`, `Icons.Default.PhotoSizeSelectLarge`, `Icons.Default.Security`
-- Transformations: `Icons.Default.RotateRight`, `Icons.Default.RotateLeft`, `Icons.Default.Flip`
-- Markup & Safety: `Icons.Default.VisibilityOff`, `Icons.Default.Check`, `Icons.Default.Close`, `Icons.Default.Delete`
+### 1. Load an image
+- On **Home**, tap the large **Open Photo or Document** card to pick an image from your
+  device gallery, **or**
+- Tap any row under **Home Office Playground** to load a built-in demo sample
+  (passport, receipt, raw photo, shipping label), **or**
+- Use the **Quick Studio Tools** grid to jump straight into a tool.
 
-### Typography & Metric Rhythm
-Defined in `com.curiositygarage.imagekit.ui.theme.Type.kt`:
-- **Display / Large Title**: 34sp Bold with tight tracking (`(-0.4).sp`) for iOS page headings.
-- **Headline / Title Medium**: 17sp–20sp SemiBold with `(-0.3).sp` tracking.
-- **Body Regular**: 15sp with `(-0.1).sp` tracking.
-- **Subheadline / Callout**: 13sp with neutral tracking.
-- **Footnote / Caption**: 10sp–11sp SemiBold for tab bars and badges.
+### 2. Edit in the Studio
+1. Choose a tool from the editor's tool dock:
+   **Optimize · Crop · Filters · Auto · Adjust · Markup**.
+2. Apply edits. The live canvas shows the result immediately, and every change is
+   pushed onto an undo/redo history (use **Undo** / **Redo** in the top bar;
+   **Reset** returns to the original).
+3. Use **Compare** to hold-and-reveal the original while pressed.
 
-### Color Palette (Semantic Tokens)
-Defined in `com.curiositygarage.imagekit.ui.theme.Color.kt`:
-```kotlin
-val IosSystemBlue = Color(0xFF0A84FF)
-val IosSystemGreen = Color(0xFF30D158)
-val IosSystemRed = Color(0xFFFF453A)
-val IosSystemOrange = Color(0xFFFF9F0A)
-val IosSystemGray = Color(0xFF8E8E93)
+### 3. Export or Save
+- Open **Optimize** and set:
+  - **Output Format** — JPEG / PNG / WebP,
+  - **Resolution** — percentage scale or exact pixels,
+  - **Compression Quality** — 1–100%, and/or
+  - a **target size** (e.g. `< 500 KB`) to auto-fit via binary search.
+- Tap **Save**. The result is written to the app's local export store and appears
+  in the **Library** tab, and is handed to the system photo gallery.
 
-val IosSystemBackgroundDark = Color(0xFF000000)
-val IosSecondarySystemBackgroundDark = Color(0xFF1C1C1E)
-val IosTertiarySystemBackgroundDark = Color(0xFF2C2C2E)
-val IosGroupedBackgroundDark = Color(0xFF000000)
-val IosSecondaryGroupedBackgroundDark = Color(0xFF1C1C1E)
+### 4. Batch process
+1. On **Batch**, tap **Import Images** to queue multiple photos, or **Add Demo Queue**
+   to load samples.
+2. Set the batch **Output Settings** (downscale, format, quality).
+3. Tap **Process & Convert All** and watch per-image progress.
 
-val IosLabelPrimary = Color(0xFFFFFFFF)
-val IosLabelSecondary = Color(0x99EBEBF5)
-val IosLabelTertiary = Color(0x4DEBEBF5)
-val IosSeparatorOpaque = Color(0x33545458)
+### 5. Review history
+- Open **Library** to see all saved exports with their size and dimensions.
+
+---
+
+## Requirements
+
+| Requirement | Value |
+|---|---|
+| **Android version** | 7.0 (API 24) and above |
+| **Target / compile SDK** | API 36 |
+| **Language** | Kotlin 2.2.x |
+| **Build system** | Gradle (Kotlin DSL) + Android Gradle Plugin 9.1.x |
+| **JDK** | 17+ (Android Studio bundled JDK recommended) |
+| **Android Studio** | Current stable recommended |
+| **Network** | **None.** The app is fully offline and needs no API keys. |
+| **Permissions** | Gallery/photo picker access only (via the system photo picker). No broad storage, camera, or location permissions. |
+
+---
+
+## Building & Running
+
+### 1. Get the prerequisites (not in the repo)
+Machine-specific files are intentionally gitignored. Create them locally:
+
+**`local.properties`** in the project root, pointing at your Android SDK:
+```properties
+sdk.dir=/path/to/your/Android/Sdk
 ```
+Alternatively, set the `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variable.
 
----
-
-## Technical Architecture & Frameworks
-
-### Tech Stack Overview
-- **Language**: 100% Kotlin (1.9.x+)
-- **UI Framework**: Jetpack Compose (Material 3 base customized to iOS HIG)
-- **Concurrency & Pipelines**: Kotlin Coroutines (`Dispatchers.IO`, `Dispatchers.Default`), `StateFlow`, `SharedFlow`
-- **Image Processing**: Android Native Canvas, `android.graphics.Bitmap`, `android.graphics.ColorMatrix`, `android.graphics.Paint`, `android.graphics.RenderEffect`
-- **Build System**: Gradle Kotlin DSL (`build.gradle.kts`) with Version Catalog (`libs.versions.toml`)
-
-### Core Directory & Package Structure
-
-```
-app/src/main/java/com/example/
-├── ImageKitApplication.kt         # Application lifecycle entry point
-├── MainActivity.kt                # Single activity with edge-to-edge window insets
-│
-├── model/
-│   └── ImageModels.kt             # Data classes, enums, tool definitions, filter presets
-│
-├── util/
-│   ├── BitmapProcessor.kt         # Core image mutation, filters, and compression algorithms
-│   ├── ImageStorageManager.kt     # Local disk I/O, cache management, and artifact persistence
-│   └── SampleImages.kt            # High-fidelity procedural test image generators
-│
-├── viewmodel/
-│   ├── ImageEditorViewModel.kt    # Studio editor state holder, history stack, undo/redo
-│   └── BatchProcessViewModel.kt   # Batch execution queue, parallel worker orchestration
-│
-└── ui/
-    ├── MainScreen.kt              # Root scaffold, floating glass tab bar, tab routing
-    ├── components/
-    │   └── CommonComponents.kt    # iOS grouped cards, segmented controls, capsule buttons
-    ├── screens/
-    │   ├── HomeScreen.kt          # Quick launch workbench, preset shortcuts, featured metrics
-    │   ├── StudioEditorScreen.kt  # Hero canvas, tool dock, active editor panel orchestration
-    │   ├── BatchProcessScreen.kt  # Multi-file queue, preset applicator, progress monitor
-    │   ├── LibraryScreen.kt       # Export history, artifact viewer, storage footprint
-    │   └── editor/
-    │       ├── AdjustmentSliderPanel.kt # Brightness, contrast, vignette sliders
-    │       ├── AspectRatioPicker.kt     # Freeform & preset crop selector + orientation
-    │       ├── CompareToggle.kt         # Hold-to-reveal and split-slider comparison
-    │       ├── CropOverlayView.kt       # 8-handle touch gesture crop viewport
-    │       ├── EditorPreviewCanvas.kt   # Interactive photo viewport with pinch & pan
-    │       ├── ExportOptionsPanel.kt    # Format, resolution, target-byte controls
-    │       ├── FilterStrip.kt           # Real-time filter thumbnail picker
-    │       └── MarkupToolbar.kt         # Blur, blackout, and pixelation tools
-    └── theme/
-        ├── Color.kt               # iOS System semantic color palette
-        ├── Theme.kt               # Centralized Dark/Light theme composable
-        └── Type.kt                # SF-Pro typographic scale and letter-spacing
-```
-
-### State Management & MVVM Data Flow
-1. **Unidirectional Data Flow**: The UI observes immutable `EditorUiState` and `BatchUiState` exposed via `StateFlow` from ViewModels.
-2. **History Management**: Non-destructive transformations are kept in an `ArrayDeque<Bitmap>` stack inside `ImageEditorViewModel`, supporting full multi-level Undo and Redo operations.
-3. **Off-Main-Thread Processing**: Every filtering, cropping, scaling, and compression pass is dispatched strictly to `Dispatchers.Default` or `Dispatchers.IO` with cancellation support.
-
-### Bitmap Processing Engine (`BitmapProcessor.kt`)
-- **Binary Search Target-Byte Compression**: Computes the optimal quality factor `Q ∈ [5, 100]` to compress an image within a given byte threshold using iterative binary search in fewer than 6 iterations.
-- **Color Matrix Filters**: Uses optimized 4×5 `ColorMatrix` arrays for fast hardware-accelerated color conversions (Monochrome, Warm, Cool, Sepia, Invert, Vivid).
-- **Pixelation & Redaction Algorithms**: Downsamples bounding sub-rectangles onto scaled intermediate bitmaps with nearest-neighbor interpolation or box-blur kernels before blitting back onto the target canvas.
-
----
-
-## Storage, Privacy & Telemetry / Logging Architecture
-
-- **Zero Remote Logging**: No TemplateDep Crashlytics, Google Analytics, or third-party tracking libraries are included.
-- **Local Application Logging**: Standard Android `android.util.Log` wrappers are utilized for debug diagnostics:
-  - Tag: `ImageKit_Studio`
-  - Lifecycle and memory profiling log levels: `Log.d` for compression timing metrics, `Log.w` for memory warnings, `Log.e` for unrecoverable I/O faults.
-- **Isolated Storage**: Output images are saved strictly to the application's internal sandboxed storage directory (`context.filesDir/exports/`) or passed to the system photo picker without requiring broad external storage permissions.
-
----
-
-## Testing, Build, and Verification
-
-### Compilation
-The project compiles cleanly using standard Android Gradle toolchains:
+**`debug.keystore`** in the project root (used for debug signing). Android Studio
+auto-creates one on first debug build, or generate your own:
 ```bash
-gradle assembleDebug
+keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey \
+  -keypass android -dname "CN=Android Debug,O=Android,C=US"
 ```
+This file is gitignored and never committed.
 
-### Verification Checks
-- **Emoji Elimination**: UI layer contains zero Unicode emoji characters in text strings, resource XMLs, and data classes.
-- **Accessibility**: All interactive elements maintain touch targets >= 48dp with semantic `testTag` descriptors (e.g., `testTag("nav_tab_home")`, `testTag("apply_crop_button")`).
-- **Memory Safety**: `Bitmap.recycle()` is managed properly to prevent OOM errors during high-resolution processing.
-
----
-
-## Building Locally
-
-### Prerequisites (not in the repo — add your own)
-The repo intentionally gitignores machine-specific files. Before building, create these locally:
-
-1. `local.properties` in the project root:
-   ```properties
-   sdk.dir=/path/to/your/Android/Sdk
-   ```
-   (Replace with your actual Android SDK path.)
-   - OR set the `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variable instead.
-
-2. `debug.keystore` in the project root (used by `debugConfig` signing in app/build.gradle.kts).
-   - A fresh debug keystore is auto-created the first time you run a debug build in Android Studio, OR you can generate one with:
-     ```bash
-     keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey \
-       -keypass android -dname "CN=Android Debug,O=Android,C=US"
-     ```
-   - Note: the file is gitignored so it never gets committed.
-
-### Build
+### 2. Build
 From the project root:
 ```bash
+./gradlew assembleDebug
+```
+If the Gradle wrapper is not present in your checkout, use your local Gradle:
+```bash
 gradle assembleDebug
 ```
-This produces the APK at:
-`app/build/outputs/apk/debug/app-debug.apk`
+The APK is produced at:
+```
+app/build/outputs/apk/debug/app-debug.apk
+```
 
-### Install to a connected device
+### 3. Install to a connected device
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Notes
-- This is a fully offline app — it does not require any API keys or `.env` credentials. The `.env.example` is optional and unused by default; remove the `signingConfig = signingConfigs.getByName("debugConfig")` line only if you set up release signing, not for local debug builds.
-- If `gradle` is not on your PATH, use the Gradle wrapper (`./gradlew`) or the full path to your Gradle install.
+> **Note:** The APK is not committed to this repository (build outputs are
+> gitignored). Build it locally with the steps above, or download it from the
+> project's Releases page if one is published.
+
+### 4. Running the tests
+```bash
+./gradlew testDebugUnitTest
+```
 
 ---
 
-## License & Credits
+## Architecture
 
-Built with Kotlin & Jetpack Compose. Designed following the Apple Human Interface Guidelines and Material 3 foundational engineering principles.
+### Tech Stack
+- **Language:** Kotlin 2.2.x
+- **UI:** Jetpack Compose (Material 3 base, customized to an iOS-HIG visual language)
+- **Concurrency:** Kotlin Coroutines (`Dispatchers.IO` / `Dispatchers.Default`), `StateFlow`
+- **Image processing:** Android Canvas, `android.graphics.Bitmap`, `ColorMatrix`, `RenderEffect`
+- **Logging:** Timber (debug + production trees)
+
+### Package Structure
+```
+app/src/main/java/com/example/
+├── ImageKitApplication.kt         # Application entry; Timber logging init
+├── MainActivity.kt                # Single activity, edge-to-edge
+├── model/
+│   └── ImageModels.kt             # Data classes, enums, presets, tool definitions
+├── util/
+│   ├── BitmapProcessor.kt         # Core image mutation, filters, compression, storage
+│   └── SampleImages.kt            # Procedural demo-image generators
+├── viewmodel/
+│   └── ImageEditorViewModel.kt    # Editor state, undo/redo history, batch, save
+└── ui/
+    ├── MainScreen.kt              # Root scaffold + floating glass tab bar
+    ├── components/
+    │   └── CommonComponents.kt    # Grouped cards, segmented controls, capsule buttons
+    ├── screens/
+    │   ├── HomeScreen.kt          # Import workbench, demo samples, quick tools
+    │   ├── StudioEditorScreen.kt  # Canvas + tool dock + panel orchestration
+    │   ├── BatchProcessScreen.kt  # Batch queue + progress
+    │   ├── LibraryScreen.kt       # Export history
+    │   └── editor/
+    │       ├── AdjustmentSliderPanel.kt
+    │       ├── AspectRatioPicker.kt
+    │       ├── CompareToggle.kt
+    │       ├── CropOverlayView.kt
+    │       ├── EditorPreviewCanvas.kt
+    │       ├── ExportOptionsPanel.kt
+    │       ├── FilterStrip.kt
+    │       └── MarkupToolbar.kt
+    └── theme/
+        ├── Color.kt               # iOS system semantic palette
+        ├── Theme.kt               # Dark/light theme
+        └── Type.kt                # Typographic scale
+```
+
+### Data Flow
+Unidirectional: the UI observes immutable `EditorUiState` exposed via `StateFlow`
+from `ImageEditorViewModel`. Non-destructive edits are kept on an `ArrayDeque<Bitmap>`
+history stack (undo/redo). All filtering, cropping, scaling, and compression runs off
+the main thread with cancellation support.
+
+---
+
+## Privacy & Logging
+
+- **100% offline.** No network calls, no analytics, no crash reporting SDKs, no
+  third-party tracking. Nothing leaves the device.
+- **Local logging only** via Timber (tag `ImageKit`). Debug builds log diagnostics;
+  production builds suppress verbose output and record no personally identifiable data.
+- **Sandboxed storage.** Exports are written to the application's internal storage
+  and shared back through the system photo picker — no broad external-storage
+  permission is required.
+
+---
+
+## Restrictions & Known Limitations
+
+- **Android only.** This is a native Android app (Kotlin/Compose); it does not build
+  or run on iOS, desktop, or web.
+- **Offline by design.** There is no cloud sync, account, or server component.
+- **Debug builds only out of the box.** The repo ships a debug signing config. To
+  produce a release build you must supply your own signing keystore via the
+  `KEYSTORE_PATH` / `STORE_PASSWORD` / `KEY_PASSWORD` environment variables
+  (see `app/build.gradle.kts`).
+- **No EXIF metadata editing.** Image metadata (e.g. GPS, camera info) is not
+  stripped or edited by the app.
+- Internal Kotlin package namespace is `com.curiositygarage.imagekit` (a template default); the
+  application ID is `com.curiositygarage.imagekit`.
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file.
+
+Copyright (c) 2026 Curiosity Garage.
