@@ -171,7 +171,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### Package Structure
 ```
-app/src/main/java/com/example/
+app/src/main/java/com/curiositygarage/imagekit/
 ├── ImageKitApplication.kt         # Application entry; Timber logging init
 ├── MainActivity.kt                # Single activity, edge-to-edge
 ├── model/
@@ -236,8 +236,8 @@ the main thread with cancellation support.
   (see `app/build.gradle.kts`).
 - **No EXIF metadata editing.** Image metadata (e.g. GPS, camera info) is not
   stripped or edited by the app.
-- Internal Kotlin package namespace is `com.curiositygarage.imagekit` (a template default); the
-  application ID is `com.curiositygarage.imagekit`.
+- Internal Kotlin package namespace is `com.curiositygarage.imagekit`, matching the
+  application ID.
 
 ---
 

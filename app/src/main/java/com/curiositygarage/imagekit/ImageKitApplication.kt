@@ -18,11 +18,15 @@ class ImageKitApplication : Application() {
             })
             Timber.tag("ImageKitApp").i("Timber DebugTree initialized successfully")
         } else {
-            // Production tree: record warnings and errors
+            // Production tree: record warnings and errors to logcat, no PII.
             Timber.plant(object : Timber.Tree() {
                 override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    if (priority >= Log.WARN) {
-                        // Keep production log clean of PII and verbose noise
+                    if (priority < Log.WARN) return
+                    val logTag = tag ?: "ImageKit"
+                    if (t != null) {
+                        Log.println(priority, logTag, "$message\n${Log.getStackTraceString(t)}")
+                    } else {
+                        Log.println(priority, logTag, message)
                     }
                 }
             })
