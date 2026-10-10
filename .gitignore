@@ -17,3 +17,8 @@ debug.keystore.base64
 apk_export/
 .build-outputs/
 *.hprof
+
+# Sensitive / generated artifacts — never commit
+
+
+*.log

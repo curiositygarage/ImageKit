@@ -122,13 +122,9 @@ sdk.dir=/path/to/your/Android/Sdk
 ```
 Alternatively, set the `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variable.
 
-**`debug.keystore`** in the project root (used for debug signing). Android Studio
-auto-creates one on first debug build, or generate your own:
-```bash
-keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey \
-  -keypass android -dname "CN=Android Debug,O=Android,C=US"
-```
-This file is gitignored and never committed.
+**`debug.keystore`** — none needed. The Android Gradle Plugin auto-generates its
+own default debug keystore at `~/.android/debug.keystore` on the first debug
+build, so no keystore file is required in the project root.
 
 ### 2. Build
 From the project root:
